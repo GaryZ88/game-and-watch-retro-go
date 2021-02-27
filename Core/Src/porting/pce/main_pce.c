@@ -194,7 +194,13 @@ void LoadCartPCE() {
 	offset = ROM_DATA_LENGTH & 0x1fff;
     PCE.ROM_SIZE = (ROM_DATA_LENGTH - offset) / 0x2000;
  	PCE.ROM_DATA = PCE.ROM + offset;
-   	PCE.ROM_CRC = crc32_le(0, PCE.ROM, ROM_DATA_LENGTH);
+
+   	// CRC calculation is trimmed for large rom (SF2?)
+	if (PCE.ROM_SIZE < 192) {
+	   	PCE.ROM_CRC = crc32_le(0, PCE.ROM, ROM_DATA_LENGTH);
+	} else {
+		PCE.ROM_CRC = crc32_le(0, PCE.ROM, 4096);
+	}
    	uint IDX = 0;
    	uint ROM_MASK = 1;
 
@@ -202,7 +208,7 @@ void LoadCartPCE() {
    	ROM_MASK--;
 
 #ifdef PCE_SHOW_DEBUG
-   	printf("Rom Size: %d, B1:%X, B2:%X, B3:%X, B4:%X" , ROM_DATA_LENGTH, PCE.ROM[0], PCE.ROM[1],PCE.ROM[2],PCE.ROM[3]);
+   	printf("RL:%d, B1:%X, B2:%X, B3:%X, B4:%X, RS:%d\n" , ROM_DATA_LENGTH, PCE.ROM[0], PCE.ROM[1],PCE.ROM[2],PCE.ROM[3],PCE.ROM_SIZE);
 #endif
 
    	for (int index = 0; index < KNOWN_ROM_COUNT; index++) {
